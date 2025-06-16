@@ -14,7 +14,8 @@ import { useAnalysis } from "@/context/analysis-context"
 
 export default function RecommendationsPage() {
   const searchParams = useSearchParams()
-  const fileId = searchParams.get('fileId')
+  const { fileId: contextFileId } = useAnalysis()
+  const fileId = searchParams.get('fileId') || contextFileId
   const { analysisResult } = useAnalysis()
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [showGifts, setShowGifts] = useState(false)
@@ -22,42 +23,27 @@ export default function RecommendationsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchRecommendations = async () => {
-    if (!analysisResult || !Array.isArray(analysisResult) || analysisResult.length === 0) {
-      setError('분석 결과가 없습니다.')
-      setLoading(false)
-      return
-    }
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const results: RecommendationResult[] = await generateGiftRecommendations(analysisResult, {})
-
-      if (!results || results.length === 0) {
-        throw new Error("추천할 수 있는 선물이 없습니다.")
+  useEffect(() => {
+    async function fetchRecommendations() {
+      if (!fileId) {
+        setError('파일 ID가 없습니다.')
+        setLoading(false)
+        return
       }
 
-      // 날짜별로 정렬
-      const sortedResults = results.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      setRecommendations(sortedResults)
-      setSelectedIndex(sortedResults.length - 1)
-      setShowGifts(true)
-    } catch (err) {
-      console.error('Error fetching recommendations:', err)
-      setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.")
-      setShowGifts(false)
-    } finally {
-      setLoading(false)
+      try {
+        const result = await generateGiftRecommendations(fileId)
+        setRecommendations(result.data)
+      } catch (err) {
+        console.error('Recommendation error:', err)
+        setError(err instanceof Error ? err.message : '추천 중 오류가 발생했습니다.')
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
-  useEffect(() => {
-    if (analysisResult) {
-      fetchRecommendations()
-    }
-  }, [analysisResult])
+    fetchRecommendations()
+  }, [fileId])
 
   return (
     <section className="flex flex-col items-center justify-center min-h-[70vh] py-12">

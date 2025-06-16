@@ -6,12 +6,14 @@ import { Gift, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { uploadFile } from "@/lib/analyze"
+import { useAnalysis } from "@/context/analysis-context"
 
 function FileUpload() {
   const [file, setFile] = useState<File | null>(null)
   const [error, setError] = useState<string>("")
   const [isUploading, setIsUploading] = useState(false)
   const router = useRouter()
+  const { setFileId } = useAnalysis()
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -43,7 +45,8 @@ function FileUpload() {
 
     try {
       const result = await uploadFile(file)
-      router.push(`/analysis?fileId=${result.fileId}`)
+      setFileId(result.data.fileId)
+      router.push(`/analysis?fileId=${result.data.fileId}`)
     } catch (err) {
       console.error('Upload error:', err)
       setError(err instanceof Error ? err.message : "파일 업로드 중 오류가 발생했습니다.")
@@ -70,6 +73,7 @@ function FileUpload() {
             onChange={handleFileChange}
             className="hidden"
             id="file-upload"
+            key="file-upload"
           />
         </label>
       </div>

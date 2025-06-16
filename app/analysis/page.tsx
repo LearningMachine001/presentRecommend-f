@@ -25,7 +25,8 @@ import { useAnalysis } from "@/context/analysis-context"
 
 export default function AnalysisPage() {
   const searchParams = useSearchParams()
-  const fileId = searchParams.get('fileId')
+  const { fileId: contextFileId, setFileId } = useAnalysis()
+  const fileId = searchParams.get('fileId') || contextFileId
   const { setAnalysisResult } = useAnalysis()
   const [analysisResult, setAnalysisResultState] = useState<AnalysisResult[] | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -41,8 +42,9 @@ export default function AnalysisPage() {
 
       try {
         const results = await analyzeConversation(fileId)
-        setAnalysisResultState(results)
-        setAnalysisResult(results)
+        setAnalysisResultState(results.data)
+        setAnalysisResult(results.data)
+        setFileId(fileId)
       } catch (err) {
         console.error('Analysis error:', err)
         setError(err instanceof Error ? err.message : '분석 중 오류가 발생했습니다.')
@@ -52,7 +54,7 @@ export default function AnalysisPage() {
     }
 
     fetchAnalysis()
-  }, [fileId, setAnalysisResult])
+  }, [fileId, setAnalysisResult, setFileId])
 
   if (loading) {
     return (
