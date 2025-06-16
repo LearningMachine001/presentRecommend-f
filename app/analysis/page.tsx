@@ -1,10 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Gift, Home, BarChart2, MessageSquare, Heart, Star } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { analyzeConversation } from "@/lib/analyze"
+import type { AnalysisResult } from "@/lib/analyze"
 import {
   BarChart,
   Bar,
@@ -18,32 +21,90 @@ import {
   Area,
   AreaChart,
 } from "recharts"
-
-// Mock data for demonstration
-const keywordData = [
-  { name: "생일", value: 15 },
-  { name: "선물", value: 12 },
-  { name: "축하", value: 10 },
-  { name: "파티", value: 8 },
-  { name: "기념일", value: 6 },
-]
-
-const relationshipData = [
-  { date: "1월", intimacy: 65, trend: 65 },
-  { date: "2월", intimacy: 75, trend: 70 },
-  { date: "3월", intimacy: 60, trend: 68 },
-  { date: "4월", intimacy: 85, trend: 72 },
-  { date: "5월", intimacy: 70, trend: 75 },
-  { date: "6월", intimacy: 90, trend: 80 },
-  { date: "7월", intimacy: 75, trend: 82 },
-  { date: "8월", intimacy: 95, trend: 85 },
-  { date: "9월", intimacy: 80, trend: 87 },
-  { date: "10월", intimacy: 88, trend: 88 },
-  { date: "11월", intimacy: 92, trend: 89 },
-  { date: "12월", intimacy: 95, trend: 90 },
-]
+import { useAnalysis } from "@/context/analysis-context"
 
 export default function AnalysisPage() {
+  const searchParams = useSearchParams()
+  const fileId = searchParams.get('fileId')
+  const { setAnalysisResult } = useAnalysis()
+  const [analysisResult, setAnalysisResultState] = useState<AnalysisResult[] | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function fetchAnalysis() {
+      if (!fileId) {
+        setError('파일 ID가 없습니다.')
+        setLoading(false)
+        return
+      }
+
+      try {
+        const results = await analyzeConversation(fileId)
+        setAnalysisResultState(results)
+        setAnalysisResult(results)
+      } catch (err) {
+        console.error('Analysis error:', err)
+        setError(err instanceof Error ? err.message : '분석 중 오류가 발생했습니다.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAnalysis()
+  }, [fileId, setAnalysisResult])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">분석 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <Button asChild className="bg-pink-500 text-white rounded-full px-8 py-4 text-lg font-bold shadow-md hover:bg-pink-600 transition-all duration-300 hover:scale-105">
+            <Link href="/">홈으로 돌아가기</Link>
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  if (!analysisResult) {
+    return null
+  }
+
+  // keywords: 모든 AnalysisResult의 keywords를 평탄화하여 name별로 score를 합산
+  const keywordMap: Record<string, number> = {}
+  analysisResult.forEach(item => {
+    item.keywords.forEach(kw => {
+      if (keywordMap[kw.name]) {
+        keywordMap[kw.name] += kw.score
+      } else {
+        keywordMap[kw.name] = kw.score
+      }
+    })
+  })
+  // 상위 5개만 추출
+  const keywords = Object.entries(keywordMap)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5)
+
+  // relationship: 날짜별로 intimacy를 모아 그래프 데이터 생성
+  const relationship = analysisResult.map(item => ({
+    date: item.date,
+    intimacy: item.intimacy,
+  }))
+
   return (
     <section className="flex flex-col items-center justify-center min-h-screen py-12 bg-gradient-to-b from-white to-pink-50">
       <div className="mb-10 text-center">
@@ -62,7 +123,7 @@ export default function AnalysisPage() {
           <CardContent>
             <div className="h-[500px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={keywordData}>
+                <BarChart data={keywords}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" tick={{ fill: '#4b5563', fontSize: 14 }} />
                   <YAxis tick={{ fill: '#4b5563', fontSize: 14 }} />
@@ -93,7 +154,7 @@ export default function AnalysisPage() {
           <CardContent>
             <div className="h-[500px]">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={relationshipData}>
+                <AreaChart data={relationship}>
                   <defs>
                     <linearGradient id="colorIntimacy" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
@@ -102,7 +163,7 @@ export default function AnalysisPage() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="date" tick={{ fill: '#4b5563', fontSize: 14 }} />
-                  <YAxis domain={[0, 100]} tick={{ fill: '#4b5563', fontSize: 14 }} />
+                  <YAxis domain={[0, 5]} tick={{ fill: '#4b5563', fontSize: 14 }} ticks={[0,1,2,3,4,5]} />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: 'rgba(255, 255, 255, 0.9)',
@@ -119,13 +180,6 @@ export default function AnalysisPage() {
                     fillOpacity={1}
                     fill="url(#colorIntimacy)"
                   />
-                  <Line
-                    type="monotone"
-                    dataKey="trend"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    dot={false}
-                  />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -135,7 +189,7 @@ export default function AnalysisPage() {
 
       <div className="flex justify-center mt-8">
         <Button asChild className="bg-pink-500 text-white rounded-full px-8 py-4 text-lg font-bold shadow-md hover:bg-pink-600 transition-all duration-300 hover:scale-105">
-          <a href="/recommendations">선물 추천받기</a>
+          <Link href={`/recommendations?fileId=${fileId}`}>선물 추천받기</Link>
         </Button>
       </div>
     </section>

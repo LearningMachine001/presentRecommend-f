@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Gift, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { uploadFile } from "@/lib/analyze"
 
 function FileUpload() {
   const [file, setFile] = useState<File | null>(null)
@@ -41,23 +42,8 @@ function FileUpload() {
     setError("")
 
     try {
-      const formData = new FormData()
-      formData.append("file", file)
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "파일 업로드에 실패했습니다.")
-      }
-
-      if (data.redirect) {
-        router.push(data.redirect)
-      }
+      const result = await uploadFile(file)
+      router.push(`/analysis?fileId=${result.fileId}`)
     } catch (err) {
       console.error('Upload error:', err)
       setError(err instanceof Error ? err.message : "파일 업로드 중 오류가 발생했습니다.")
