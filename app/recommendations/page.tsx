@@ -14,15 +14,21 @@ import { useAnalysis } from "@/context/analysis-context"
 
 export default function RecommendationsPage() {
   const searchParams = useSearchParams()
-  const fileId = searchParams.get('fileId')
+  // const fileId = searchParams.get('fileId')is()
   const { analysisResult } = useAnalysis()
   const [selectedIndex, setSelectedIndex] = useState(0)
   const [showGifts, setShowGifts] = useState(false)
   const [recommendations, setRecommendations] = useState<RecommendationResult[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const fileId = searchParams.get('fileId')
 
   const fetchRecommendations = async () => {
+    if (!fileId) {
+    setError('fileId가 없습니다.')
+    setLoading(false)
+    return
+    }
     if (!analysisResult || !Array.isArray(analysisResult) || analysisResult.length === 0) {
       setError('분석 결과가 없습니다.')
       setLoading(false)
@@ -33,7 +39,9 @@ export default function RecommendationsPage() {
       setLoading(true)
       setError(null)
 
-      const results: RecommendationResult[] = await generateGiftRecommendations(analysisResult, {})
+      // const results: RecommendationResult[] = await generateGiftRecommendations(analysisResult, {})
+      console.log("🚀 추천 요청 전에 fileId 확인:", fileId);
+      const results = await generateGiftRecommendations(fileId)
 
       if (!results || results.length === 0) {
         throw new Error("추천할 수 있는 선물이 없습니다.")
