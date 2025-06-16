@@ -17,19 +17,12 @@ export default function RecommendationsPage() {
   const fileId = searchParams.get("fileId");
   const { analysisResult } = useAnalysis();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [showGifts, setShowGifts] = useState(false);
-  const [recommendations, setRecommendations] = useState<
-    RecommendationResult[]
-  >([]);
+  const [recommendations, setRecommendations] = useState<RecommendationResult[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchRecommendations = async () => {
-    if (
-      !analysisResult ||
-      !Array.isArray(analysisResult) ||
-      analysisResult.length === 0
-    ) {
+    if (!analysisResult || !Array.isArray(analysisResult) || analysisResult.length === 0) {
       setError("분석 결과가 없습니다.");
       setLoading(false);
       return;
@@ -55,13 +48,9 @@ export default function RecommendationsPage() {
       );
       setRecommendations(sortedResults);
       setSelectedIndex(sortedResults.length - 1);
-      setShowGifts(true);
     } catch (err) {
       console.error("Error fetching recommendations:", err);
-      setError(
-        err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다."
-      );
-      setShowGifts(false);
+      setError(err instanceof Error ? err.message : "알 수 없는 오류가 발생했습니다.");
     } finally {
       setLoading(false);
     }
@@ -101,60 +90,49 @@ export default function RecommendationsPage() {
             {recommendations.length > 0 && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                  {showGifts &&
-                    recommendations[selectedIndex]?.recommendations
-                      .slice(0, 3)
-                      .map((gift) => (
-                        <Card
-                          key={gift.id}
-                          className="overflow-hidden rounded-2xl shadow-md border-0 bg-white/95 hover:shadow-xl transition-shadow duration-300"
-                        >
-                          <CardContent className="p-6 flex flex-col items-center">
-                            <div className="aspect-square w-full mb-4">
-                              <img
-                                src={gift.imageUrl}
-                                alt={gift.name}
-                                className="w-full h-full object-cover rounded-xl"
-                              />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2 text-gray-900 text-center">
-                              {gift.name}
-                            </h3>
-                            <p className="text-gray-500 text-sm mb-2 text-center">
-                              {gift.category}
-                            </p>
-                            <p className="text-xl font-bold mb-4 text-pink-500 text-center">
-                              {gift.price}
-                            </p>
-                            <p className="text-sm text-gray-600 mb-4 text-center">
-                              {gift.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      ))}
+                  {recommendations[selectedIndex]?.recommendations.slice(0, 3).map((gift) => (
+                    <a
+                      key={gift.id}
+                      href={gift.description}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block h-full"
+                    >
+                      <Card className="overflow-hidden rounded-2xl shadow-md border-0 bg-white/95 hover:shadow-xl transition-shadow duration-300 cursor-pointer h-full">
+                        <CardContent className="p-6 flex flex-col items-center h-full">
+                          <div className="aspect-square w-full mb-4">
+                            <img
+                              src={gift.imageUrl}
+                              alt={gift.name}
+                              className="w-full h-full object-cover rounded-xl"
+                            />
+                          </div>
+                          <h3 className="text-lg font-semibold mb-2 text-gray-900 text-center line-clamp-2">
+                            {gift.name}
+                          </h3>
+                          <p className="text-gray-500 text-sm mb-2 text-center">
+                            {gift.category}
+                          </p>
+                          <p className="text-xl font-bold mb-4 text-pink-500 text-center">
+                            {gift.price}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </a>
+                  ))}
                 </div>
-                <div className="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-lg flex flex-col items-center z-50">
+                <div className="sticky bottom-10 left-1/2 -translate-x-1/2 w-full max-w-lg flex flex-col items-center z-50 bg-white/80 backdrop-blur-sm py-4 rounded-lg">
                   <Slider
                     min={0}
                     max={recommendations.length - 1}
                     step={1}
                     value={[selectedIndex]}
-                    onValueChange={([v]) => {
-                      setSelectedIndex(v);
-                      setShowGifts(false);
-                    }}
+                    onValueChange={([v]) => setSelectedIndex(v)}
                     className="w-full max-w-lg"
                   />
                   <div className="text-lg font-bold text-pink-700 mt-2">
                     {recommendations[selectedIndex]?.date}
                   </div>
-                  <Button
-                    className="bg-pink-500 text-white rounded-full px-8 py-2 text-lg font-bold shadow-md hover:bg-pink-600 transition-all duration-300 hover:scale-105 mt-2"
-                    onClick={() => setShowGifts(true)}
-                    disabled={recommendations.length === 0}
-                  >
-                    추천받기
-                  </Button>
                 </div>
               </>
             )}

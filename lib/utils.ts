@@ -12,6 +12,8 @@ export interface GiftItem {
   imageUrl: string
   description: string
   category: string
+  url: string
+  link: string
 }
 
 export interface RecommendationResult {
