@@ -6,9 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export interface GiftItem {
+  id: string
   name: string
-  brand: string
-  price: number
-  productUrl: string
+  price: string
   imageUrl: string
+  description: string
+  category: string
+}
+
+export interface RecommendationResult {
+  date: string
+  recommendations: GiftItem[]
 }
