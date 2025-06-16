@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="container mx-auto flex items-center justify-between py-4 px-4 md:px-0">
             <Link href="/" className="flex items-center text-2xl font-extrabold text-primary gap-2">
               <Gift className="text-pink-500 w-8 h-8" />
-              선물 주니
+              ChatPick
             </Link>
             <nav>
               <ul className="flex gap-6 text-base font-semibold">
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </main>
         <footer className="bg-white/80 border-t border-gray-100 text-center py-6 text-gray-500 text-sm mt-12 shadow-inner">
           <div className="container mx-auto">
-            © 2025 선물 주니. All rights reserved.
+            © 2025 ChatPick. All rights reserved.
           </div>
         </footer>
       </body>
