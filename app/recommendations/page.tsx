@@ -69,7 +69,7 @@ export default function RecommendationsPage() {
           맞춤형 선물 추천
         </h1>
         <p className="text-lg md:text-xl text-gray-600 font-medium max-w-xl mx-auto">
-          분석 결과를 바탕으로 예산에 맞는 선물을 추천해드려요.
+          분석 결과를 바탕으로 선물을 추천해드려요.
         </p>
       </div>
       <div className="w-full max-w-5xl">

@@ -109,7 +109,7 @@ export default function AnalysisPage() {
     <section className="flex flex-col items-center justify-center min-h-screen py-12 bg-gradient-to-b from-white to-pink-50">
       <div className="mb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-pink-500 drop-shadow-sm">카카오톡 대화 분석 결과</h1>
-        <p className="text-lg md:text-xl text-gray-600 font-medium max-w-xl mx-auto">대화 데이터를 기반으로 주요 키워드와 관계 친밀도를 분석해드립니다.</p>
+        <p className="text-lg md:text-xl text-gray-600 font-medium max-w-xl mx-auto">대화 데이터를 기반으로 주요 키워드와 관계 친밀도를 분석해드려요.</p>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-7xl mb-8 px-4">
         {/* 키워드 분석 */}
