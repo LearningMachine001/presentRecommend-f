@@ -7,7 +7,7 @@ import { AnalysisProvider } from "@/context/analysis-context"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata = {
-  title: "선물 주니",
+  title: "ChatPick",
   description: "카카오톡 대화 기반 맞춤형 선물 추천 서비스",
 }
 
