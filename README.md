@@ -2,7 +2,7 @@
 2025 캡스톤 디자인 카카오톡 대화 기반 선물 추천 시스템
 
 ## 역할 분담
-<table border="1" style="width:100%; table-layout:fixed; text-align:left;">
+<table style="width:100%; display: table; table-layout:fixed; text-align:left;">
   <thead>
     <tr>
       <th style="width:10%;">역할</th>
