@@ -1,5 +1,5 @@
 # ChatPick
-2025 캡스톤 디자인 AI 기반 카카오톡 선물 추천 프로젝트 프론트엔드 개발
+2025 캡스톤 디자인 카카오톡 대화 기반 선물 추천 시스템
 
 ## 시연영상
 https://github.com/user-attachments/assets/f2fe9ce9-bf42-44bc-b322-9bdfc8e1d820
